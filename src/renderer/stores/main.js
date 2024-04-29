@@ -6,15 +6,24 @@ export const useMainStore = defineStore('main', {
   state: () => ({
     settings: {
       wowPath: '',
+      wowAccountFolders: [],
       wowVersion: 'retail',
     },
   }),
   getters: {
-    settings: (state) => state.settings,
+    getSettings: (state) => state.settings,
+    getWowPath: (state) => state.settings.wowPath,
+    getWowAccountFolders: (state) => state.settings.wowAccountFolders,
   },
   actions: {
     setSettings(settings) {
       this.settings = settings
+    },
+    setWowPath(wowPath) {
+      this.settings.wowPath = wowPath
+    },
+    setWowAccountFolders(wowAccountFolders) {
+      this.settings.wowAccountFolders = wowAccountFolders
     }
   },
 })

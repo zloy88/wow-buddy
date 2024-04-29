@@ -1,6 +1,6 @@
 import { dialog } from 'electron';
 import { dirname } from 'path';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 
 export async function selectWowFolder() {
   const winPath = 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
@@ -34,7 +34,7 @@ export async function selectWowFolder() {
   throw new Error('No valid directory selected');
 }
 
-function getSettingsPath(_app) {
+export function getSettingsPath(_app) {
   return `${_app.getAppPath()}/settings.json`;
 }
 
@@ -50,6 +50,7 @@ export function createSettingsFile(_app) {
     const defaultSettings = {
       wowPath: '',
       wowVersion: 'retail',
+      wowAccountFolders: [],
     };
     writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2), {
       encoding: 'utf-8',
@@ -85,6 +86,20 @@ export function getSettings(_app) {
   }
   // return the settings object
   return JSON.parse(readFileSync(settingsPath, 'utf-8'));
+}
+
+// read folders within the wow directory
+export async function getWowAccountFolders(wowPath) {
+  const folders = [];
+  if (existsSync(wowPath)) {
+    const files = readdirSync(wowPath + '\\WTF\\Account', {withFileTypes: true});
+    files.forEach((file) => {
+      if (file.isDirectory() && file.name !== 'SavedVariables' && file.name !== 'SavedVariables.bak') {
+        folders.push(file.name);
+      }
+    });
+  }
+  return folders;
 }
 
 function parseLogFile(parser, path) {
