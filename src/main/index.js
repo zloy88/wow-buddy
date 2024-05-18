@@ -1,8 +1,8 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import {app, shell, BrowserWindow, ipcMain} from 'electron'
+import {join} from 'path'
+import {electronApp, optimizer, is} from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { unlinkSync } from 'fs';
+import {unlinkSync} from 'fs';
 import {
   getSettings,
   getSettingsPath,
@@ -10,12 +10,17 @@ import {
   settingsFileExists,
   createSettingsFile,
   updateSettingsFile,
-  getWowAccountFolders, appendToSettingsFile,
+  getWowAccountFolders,
+  getWowRealmFolders,
+  getWowCharacterFolders,
+  updateSettingsObject,
 } from "../actions/fileActions";
+
+let mainWindow;
 
 function createWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     title: 'Seramate',
     // titleBarStyle: 'hidden',
     // autoHideMenuBar: true,
@@ -23,7 +28,7 @@ function createWindow() {
     width: 1120,
     height: 900,
     show: false,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform === 'linux' ? {icon} : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -41,7 +46,7 @@ function createWindow() {
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
-    return { action: 'deny' }
+    return {action: 'deny'}
   })
 
   // HMR for renderer base on electron-vite cli.
@@ -53,11 +58,13 @@ function createWindow() {
   }
 
   // Check if settings file exists
-  mainWindow.webContents.on('did-finish-load', ()=>{
+  mainWindow.webContents.on('did-finish-load', () => {
     if (settingsFileExists(app)) {
-      const settings = getSettings(app);
       // Send settings to renderer
+      const settings = getSettings(app);
       mainWindow.webContents.send('getSettings', settings);
+    } else {
+      createSettingsFile(app);
     }
   })
 }
@@ -104,10 +111,10 @@ ipcMain.handle('selectFolder', async (event) => {
       if (!settingsFileExists(app)) {
         createSettingsFile(app);
       }
-      updateSettingsFile(app, { wowPath: wowPath })
+      updateSettingsFile(app, {wowPath: wowPath})
       // Send selected folder to renderer
-      event.sender.send('selectFolder', wowPath);
-      return wowPath;
+      const settings = getSettings(app);
+      mainWindow.webContents.send('getSettings', settings);
     }
   }).catch((error) => {
     console.error(error);
@@ -120,21 +127,69 @@ ipcMain.handle('getWowAccountFolders', async (event) => {
   const settings = getSettings(app);
   getWowAccountFolders(settings.wowPath).then((wowAccountFolders) => {
     if (wowAccountFolders) {
-      // Send account folders to renderer
-      appendToSettingsFile(app, { wowAccountFolders: wowAccountFolders })
-      event.sender.send('getWowAccountFolders', wowAccountFolders);
-      return wowAccountFolders;
+      updateSettingsObject(app, 'wowAccountFolders', wowAccountFolders)
+      const settings = getSettings(app);
+      mainWindow.webContents.send('getSettings', settings);
     }
   }).catch((error) => {
     console.error(error);
   })
 })
 
+// Get realm folders
+ipcMain.handle('getWowRealmFolders', async (event) => {
+  const settings = getSettings(app);
+  getWowRealmFolders(settings.wowPath, settings.selectedAccountFolder).then((wowRealmFolders) => {
+    if (wowRealmFolders) {
+      updateSettingsObject(app, 'wowRealmFolders', wowRealmFolders)
+      const settings = getSettings(app);
+      mainWindow.webContents.send('getSettings', settings);
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+})
+
+// Get character folders
+ipcMain.handle('getWowCharacterFolders', async (event) => {
+  const settings = getSettings(app);
+  getWowCharacterFolders(settings.wowPath, settings.selectedAccountFolder, settings.selectedRealmFolder).then((wowCharacterFolders) => {
+    if (wowCharacterFolders) {
+      updateSettingsObject(app, 'wowCharacterFolders', wowCharacterFolders)
+      const settings = getSettings(app);
+      mainWindow.webContents.send('getSettings', settings);
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+})
+
+// Save selected account folder
+ipcMain.on('setAccountFolder', async (event, accountFolder) => {
+  updateSettingsObject(app, 'selectedAccountFolder', accountFolder);
+  const settings = getSettings(app);
+  mainWindow.webContents.send('getSettings', settings);
+})
+
+// Save selected realm folder
+ipcMain.on('setRealmFolder', async (event, realmFolder) => {
+  updateSettingsObject(app, 'selectedRealmFolder', realmFolder);
+  const settings = getSettings(app);
+  mainWindow.webContents.send('getSettings', settings);
+})
+
+// Save selected character folder
+ipcMain.on('setCharacterFolder', async (event, characterFolder) => {
+  updateSettingsObject(app, 'selectedCharacterFolder', characterFolder);
+  const settings = getSettings(app);
+  mainWindow.webContents.send('getSettings', settings);
+})
+
 // delete settings file
 ipcMain.handle('resetSelection', async (event) => {
   const settingsPath = getSettingsPath(app);
   if (settingsFileExists(app)) {
-    unlinkSync(settingsPath);
-    return { wowPath: '', wowAccountFolders: [] };
+    createSettingsFile(app);
+    mainWindow.webContents.send('getSettings', {wowPath: '', wowAccountFolders: []});
   }
 })

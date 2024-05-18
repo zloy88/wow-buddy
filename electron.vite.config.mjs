@@ -17,6 +17,18 @@ export default defineConfig({
         '@': fileURLToPath(new URL('./src/renderer', import.meta.url))
       }
     },
-    plugins: [vue()]
-  }
+    plugins: [vue()],
+  },
+  css: {
+    loaderOptions: {
+      postcss: {
+        postcssOptions: {
+          plugins: {
+            tailwindcss: {},
+            autoprefixer: {},
+          },
+        },
+      },
+    },
+  },
 })

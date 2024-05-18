@@ -1,6 +1,6 @@
-import { dialog } from 'electron';
-import { dirname } from 'path';
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
+import {dialog} from 'electron';
+import {dirname} from 'path';
+import {readFileSync, writeFileSync, existsSync, readdirSync} from 'fs';
 
 export async function selectWowFolder() {
   const winPath = 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
@@ -44,18 +44,19 @@ export function settingsFileExists(_app) {
 
 export function createSettingsFile(_app) {
   const settingsPath = getSettingsPath(_app);
-
-  // if settings file does not exist, create it.
-  if (!existsSync(settingsPath)) {
-    const defaultSettings = {
-      wowPath: '',
-      wowVersion: 'retail',
-      wowAccountFolders: [],
-    };
-    writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2), {
-      encoding: 'utf-8',
-    });
-  }
+  const defaultSettings = {
+    wowPath: '',
+    wowVersion: 'retail',
+    wowAccountFolders: [],
+    wowRealmFolders: [],
+    wowCharacterFolders: [],
+    selectedAccountFolder: '',
+    selectedRealmFolder: '',
+    selectedCharacterFolder: '',
+  };
+  writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2), {
+    encoding: 'utf-8',
+  });
 }
 
 export function updateSettingsFile(_app, settings) {
@@ -67,16 +68,11 @@ export function updateSettingsFile(_app, settings) {
   }
 }
 
-export function appendToSettingsFile(_app, settings) {
-  const settingsPath = getSettingsPath(_app);
-  const currentSettings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
-  const newSettings = { ...currentSettings, ...settings };
-  writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2), {
-    encoding: 'utf-8',
-  });
-
-  // return the settings object
-  return JSON.parse(readFileSync(settingsPath, 'utf-8'));
+// Update Key/Value pair in settings object, but do not overrite the whole object
+export function updateSettingsObject(_app, key, value) {
+  const settings = getSettings(_app);
+  settings[key] = value;
+  updateSettingsFile(_app, settings);
 }
 
 export function getSettings(_app) {
@@ -98,6 +94,38 @@ export async function getWowAccountFolders(wowPath) {
         folders.push(file.name);
       }
     });
+  }
+  return folders;
+}
+
+export async function getWowRealmFolders(wowPath, accPath) {
+  const folders = [];
+  const fullPath = wowPath + '\\WTF\\Account\\' + accPath;
+  if (existsSync(fullPath)) {
+    const files = readdirSync(fullPath, {withFileTypes: true});
+    files.forEach((file) => {
+      if (file.isDirectory() && file.name !== 'SavedVariables') {
+        folders.push(file.name);
+      }
+    });
+  } else {
+    console.log('No such file or directory', fullPath)
+  }
+  return folders;
+}
+
+export async function getWowCharacterFolders(wowPath, accPath, realmPath) {
+  const folders = [];
+  const fullPath = wowPath + '\\WTF\\Account\\' + accPath + '\\' + realmPath;
+  if (existsSync(fullPath)) {
+    const files = readdirSync(fullPath, {withFileTypes: true});
+    files.forEach((file) => {
+      if (file.isDirectory()) {
+        folders.push(file.name);
+      }
+    });
+  } else {
+    console.log('No such file or directory', fullPath)
   }
   return folders;
 }

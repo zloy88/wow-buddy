@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import {saveSelectedAccountFolder} from "../actions/fileActions";
 
 // function list to expose to the renderer
 const api = {
@@ -8,6 +9,11 @@ const api = {
     getSettings: () => ipcRenderer.invoke('getSettings'),
     selectFolder: () => ipcRenderer.invoke('selectFolder'),
     getWowAccountFolders: () => ipcRenderer.invoke('getWowAccountFolders'),
+    getWowRealmFolders: (accountFolder) => ipcRenderer.invoke('getWowRealmFolders', accountFolder),
+    getWowCharacterFolders: (realmFolder) => ipcRenderer.invoke('getWowCharacterFolders', realmFolder),
+    sendSelectedAccountFolder: (accountFolder) => ipcRenderer.send('setAccountFolder', accountFolder),
+    sendSelectedRealmFolder: (realmFolder) => ipcRenderer.send('setRealmFolder', realmFolder),
+    sendSelectedCharacterFolder: (characterFolder) => ipcRenderer.send('setCharacterFolder', characterFolder),
     resetSelection: () => ipcRenderer.invoke('resetSelection'),
   },
 }

@@ -5,15 +5,25 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 export const useMainStore = defineStore('main', {
   state: () => ({
     settings: {
+      wowVersion: 'retail',
       wowPath: '',
       wowAccountFolders: [],
-      wowVersion: 'retail',
+      wowRealmFolders: [],
+      wowCharacterFolders: [],
+      selectedAccountFolder: '',
+      selectedRealmFolder: '',
+      selectedCharacterFolder: '',
     },
   }),
   getters: {
     getSettings: (state) => state.settings,
     getWowPath: (state) => state.settings.wowPath,
     getWowAccountFolders: (state) => state.settings.wowAccountFolders,
+    getWowRealmFolders: (state) => state.settings.wowRealmFolders,
+    getWowCharacterFolders: (state) => state.settings.wowCharacterFolders,
+    getSelectedAccountFolder: (state) => state.settings.selectedAccountFolder,
+    getSelectedRealmFolder: (state) => state.settings.selectedRealmFolder,
+    getSelectedCharacterFolder: (state) => state.settings.selectedCharacterFolder,
   },
   actions: {
     setSettings(settings) {
@@ -24,7 +34,22 @@ export const useMainStore = defineStore('main', {
     },
     setWowAccountFolders(wowAccountFolders) {
       this.settings.wowAccountFolders = wowAccountFolders
-    }
+    },
+    setWowRealmFolders(wowRealmFolders) {
+      this.settings.wowRealmFolders = wowRealmFolders
+    },
+    setWowCharacterFolders(wowCharacterFolders) {
+      this.settings.wowCharacterFolders = wowCharacterFolders
+    },
+    setSelectedAccountFolder(selectedAccountFolder) {
+      this.settings.selectedAccountFolder = selectedAccountFolder
+    },
+    setSelectedRealmFolder(selectedRealmFolder) {
+      this.settings.selectedRealmFolder = selectedRealmFolder
+    },
+    setSelectedCharacterFolder(selectedCharacterFolder) {
+      this.settings.selectedCharacterFolder = selectedCharacterFolder
+    },
   },
 })
 
