@@ -1,6 +1,7 @@
 import {dialog} from 'electron';
 import {dirname} from 'path';
-import {readFileSync, writeFileSync, existsSync, readdirSync} from 'fs';
+import {existsSync, readdirSync, readFileSync, writeFileSync} from 'fs';
+import {execFile} from 'child_process';
 
 export async function selectWowFolder() {
   const winPath = 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
@@ -130,57 +131,42 @@ export async function getWowCharacterFolders(wowPath, accPath, realmPath) {
   return folders;
 }
 
-function parseLogFile(parser, path) {
-  try {
-    const fd = openSync(path, 'r');
-    const buffer = readFileSync(fd);
-    closeSync(fd);
-    const bufferString = buffer.toString('utf-8');
+export async function readREFlexData(wowPath, accPath, realmPath, charPath) {
+  const REFlexFile = wowPath + '\\WTF\\Account\\' + accPath + '\\' + realmPath + '\\' + charPath + '\\SavedVariables\\REFlex.lua';
+  const luaPath = process.cwd() + '\\lua';
+  const luaExecutable = luaPath + '\\lua54.exe';
+  const luaScriptPath = luaPath + '\\parseREFlex.lua';
 
-    const lines = bufferString.split('\n');
-    lines.forEach((line) => {
-      parser.parseLine(line);
-    });
-  } catch (e) {
-    // TODO: try to come up with some strategy to avoid these
-    // Can reproduce by copy+pasting a new log file into wow folder while logger is watching (win32)
-    // There are still some transient bugs
-    // https://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
-    return false;
+  if (existsSync(REFlexFile)) {
+    try {
+      return await executeLuaScriptWithParam(luaExecutable, luaScriptPath, REFlexFile);
+    } catch (error) {
+      console.error('Failed to execute Lua script:', error);
+      throw error;
+    }
+  } else {
+    throw new Error(`REFlex file does not exist: ${REFlexFile}`);
   }
-  return true;
 }
 
-function parseLogFileChunk(parser, path, start, size) {
-  if (size <= 0) {
-    return true;
-  }
-  try {
-    const fd = openSync(path, 'r');
-    const buffer = Buffer.alloc(size);
-    readSync(fd, buffer, 0, size, start);
-    closeSync(fd);
-    let bufferString = buffer.toString('utf-8');
-    // Was there a partial line left over from a previous call?
-    if (chunkParitialsBuffer[path]) {
-      bufferString = chunkParitialsBuffer[path] + bufferString;
-    }
-    const lines = bufferString.split('\n');
-    lines.forEach((line, idx) => {
-      if (idx === lines.length - 1) {
-        if (line.length > 0) {
-          chunkParitialsBuffer[path] = line;
-        }
-      } else {
-        parser.parseLine(line);
+// Function to execute a Lua script with a parameter
+function executeLuaScriptWithParam(luaExecutable,scriptPath, param, callback) {
+  return new Promise((resolve, reject) => {
+    execFile(luaExecutable, [scriptPath, param], (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing Lua script: ${error.message}`);
+        reject(error);
+      }
+      if (stderr) {
+        console.error(`Lua script error: ${stderr}`);
+        reject(stderr);
+      }
+      try {
+        const jsonOutput = JSON.parse(stdout);
+        resolve(jsonOutput);
+      } catch (parseError) {
+        reject(parseError);
       }
     });
-  } catch (e) {
-    // TODO: try to come up with some strategy to avoid these
-    // Can reproduce by copy+pasting a new log file into wow folder while logger is watching (win32)
-    // There are still some transient bugs
-    // https://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
-    return false;
-  }
-  return true;
+  });
 }

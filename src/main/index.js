@@ -14,6 +14,7 @@ import {
   getWowRealmFolders,
   getWowCharacterFolders,
   updateSettingsObject,
+  readREFlexData
 } from "../actions/fileActions";
 
 let mainWindow;
@@ -162,6 +163,23 @@ ipcMain.handle('getWowCharacterFolders', async (event) => {
   }).catch((error) => {
     console.error(error);
   })
+})
+
+// Parse REFlex.lua file
+ipcMain.handle('parseReflexFile', async (event) => {
+  try {
+    const settings = getSettings(app);
+    const reflexData = await readREFlexData(settings.wowPath, settings.selectedAccountFolder, settings.selectedRealmFolder, settings.selectedCharacterFolder)
+
+    if (reflexData) {
+      mainWindow.webContents.send('getSettings', settings);
+      mainWindow.webContents.send('getReflexData', reflexData);
+    }
+    console.log('REFlex data:', reflexData)
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 })
 
 // Save selected account folder

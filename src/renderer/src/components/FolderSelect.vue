@@ -17,6 +17,11 @@ const {
 window.electron.ipcRenderer.on('getSettings', (event, result) => {
   main.setSettings(result)
   window.wowbuddy.fs.getWowAccountFolders()
+  //
+  // // parse REFlex data
+  // if (getSelectedCharacterFolder) {
+  //   window.wowbuddy.fs.parseReflexFile()
+  // }
 })
 
 // Send to main process
@@ -50,12 +55,13 @@ function sendSelectedRealm(event) {
 function sendSelectedCharacter(event) {
   if (getWowPath && getSelectedAccountFolder && getSelectedRealmFolder) {
     window.wowbuddy.fs.sendSelectedCharacterFolder(event)
+    // window.wowbuddy.fs.parseReflexFile(event)
   }
 }
 </script>
 
 <template>
-  <section class="flex flex-col justify-center items-center h-full gap-4">
+  <section class="flex flex-col justify-center items-center my-8 gap-4">
     <div>
       <a class="btn-primary" @click="selectFolder">Select Folder</a>
       <a class="btn-primary" @click="resetSelection">Reset</a>

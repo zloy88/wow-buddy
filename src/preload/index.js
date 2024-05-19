@@ -15,6 +15,7 @@ const api = {
     sendSelectedRealmFolder: (realmFolder) => ipcRenderer.send('setRealmFolder', realmFolder),
     sendSelectedCharacterFolder: (characterFolder) => ipcRenderer.send('setCharacterFolder', characterFolder),
     resetSelection: () => ipcRenderer.invoke('resetSelection'),
+    parseReflexFile: () => ipcRenderer.invoke('parseReflexFile'),
   },
 }
 
