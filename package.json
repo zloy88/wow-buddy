@@ -1,10 +1,9 @@
 {
-  "name": "electron-app",
+  "name": "wow-buddy",
   "version": "1.0.0",
-  "description": "An Electron application with Vue",
+  "description": "WoW Buddy built with Electron and Vite",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "zloy88",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -21,6 +20,7 @@
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
     "electron-updater": "^6.1.7",
+    "pathe": "^1.1.2",
     "pinia": "^2.1.7"
   },
   "devDependencies": {
@@ -30,7 +30,7 @@
     "@vue/eslint-config-prettier": "^9.0.0",
     "autoprefixer": "^10.4.19",
     "electron": "^28.2.0",
-    "electron-builder": "^24.9.1",
+    "electron-builder": "^24.6.3",
     "electron-vite": "^2.0.0",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.20.1",

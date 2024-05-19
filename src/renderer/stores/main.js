@@ -7,6 +7,7 @@ export const useMainStore = defineStore('main', {
     settings: {
       wowVersion: 'retail',
       wowPath: '',
+      wowRegion: '',
       wowAccountFolders: [],
       wowRealmFolders: [],
       wowCharacterFolders: [],
@@ -24,6 +25,7 @@ export const useMainStore = defineStore('main', {
     getSelectedAccountFolder: (state) => state.settings.selectedAccountFolder,
     getSelectedRealmFolder: (state) => state.settings.selectedRealmFolder,
     getSelectedCharacterFolder: (state) => state.settings.selectedCharacterFolder,
+    getWowRegion: (state) => state.settings.wowRegion,
   },
   actions: {
     setSettings(settings) {
@@ -50,6 +52,9 @@ export const useMainStore = defineStore('main', {
     setSelectedCharacterFolder(selectedCharacterFolder) {
       this.settings.selectedCharacterFolder = selectedCharacterFolder
     },
+    setWowRegion(wowRegion) {
+      this.settings.wowRegion = wowRegion
+    }
   },
 })
 

@@ -1,4 +1,4 @@
-# seramate
+# WoW-Buddy
 
 An Electron application with Vue
 
@@ -21,7 +21,7 @@ $ npm run dev
 ```
 
 ### Build
-
+Commands need admin rights to be executed.
 ```bash
 # For windows
 $ npm run build:win

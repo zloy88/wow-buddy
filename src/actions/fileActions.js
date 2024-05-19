@@ -36,7 +36,7 @@ export async function selectWowFolder() {
 }
 
 export function getSettingsPath(_app) {
-  return `${_app.getAppPath()}/settings.json`;
+  return `${_app.getPath('userData')}/settings.json`;
 }
 
 export function settingsFileExists(_app) {
@@ -48,6 +48,7 @@ export function createSettingsFile(_app) {
   const defaultSettings = {
     wowPath: '',
     wowVersion: 'retail',
+    wowRegion: '',
     wowAccountFolders: [],
     wowRealmFolders: [],
     wowCharacterFolders: [],
@@ -163,10 +164,31 @@ function executeLuaScriptWithParam(luaExecutable,scriptPath, param, callback) {
       }
       try {
         const jsonOutput = JSON.parse(stdout);
-        resolve(jsonOutput);
+        // filter entries where isRated and isArena is true
+        const filteredOutput = jsonOutput.filter((entry) => entry.isRated && entry.isArena);
+        // sort by Time desc
+        filteredOutput.sort((a, b) => b.Time - a.Time);
+        resolve(filteredOutput);
       } catch (parseError) {
         reject(parseError);
       }
     });
   });
+}
+
+export function getRegionFromWowPath(_app, wowPath) {
+  const fullPath = wowPath + '\\WTF\\Config.wtf';
+  if (existsSync(fullPath)) {
+    const config = readFileSync(fullPath, 'utf-8');
+    const lines = config.split('\n');
+    // get line that starts with SET portal
+    const portalLine = lines.find((line) => line.startsWith('SET portal'));
+    // get region from portal line and remove \r and " characters
+    const region = portalLine.split(' ')[2].replace(/[\r"]+/g, '');
+    // write region to settings
+    updateSettingsObject(_app, 'wowRegion', region)
+
+    return region;
+  }
+  return null;
 }

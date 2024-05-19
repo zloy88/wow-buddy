@@ -14,7 +14,7 @@ import {
   getWowRealmFolders,
   getWowCharacterFolders,
   updateSettingsObject,
-  readREFlexData
+  readREFlexData, getRegionFromWowPath
 } from "../actions/fileActions";
 
 let mainWindow;
@@ -112,7 +112,10 @@ ipcMain.handle('selectFolder', async (event) => {
       if (!settingsFileExists(app)) {
         createSettingsFile(app);
       }
+      // Write selected folder to settings file
       updateSettingsFile(app, {wowPath: wowPath})
+      // Write wowRegion to settings file
+      getRegionFromWowPath(app, wowPath);
       // Send selected folder to renderer
       const settings = getSettings(app);
       mainWindow.webContents.send('getSettings', settings);
@@ -175,7 +178,6 @@ ipcMain.handle('parseReflexFile', async (event) => {
       mainWindow.webContents.send('getSettings', settings);
       mainWindow.webContents.send('getReflexData', reflexData);
     }
-    console.log('REFlex data:', reflexData)
   } catch (error) {
     console.error(error);
     throw error;
