@@ -25,7 +25,7 @@ function createWindow() {
     // titleBarStyle: 'hidden',
     // autoHideMenuBar: true,
     backgroundColor: '#000000',
-    width: 1120,
+    width: 1400,
     height: 900,
     show: false,
     ...(process.platform === 'linux' ? {icon} : {}),
@@ -61,8 +61,7 @@ function createWindow() {
   mainWindow.webContents.on('did-finish-load', () => {
     if (settingsFileExists(app)) {
       // Send settings to renderer
-      const settings = getSettings(app);
-      mainWindow.webContents.send('getSettings', settings);
+      sendSettings()
     } else {
       createSettingsFile(app);
     }
@@ -115,9 +114,8 @@ ipcMain.handle('selectFolder', async (event) => {
       updateSettingsObject(app, 'wowPath', wowPath)
       // Write wowRegion to settings file
       getRegionFromWowPath(app, wowPath);
-      // Send selected folder to renderer
-      const settings = getSettings(app);
-      mainWindow.webContents.send('getSettings', settings);
+      // Send settings to renderer
+      sendSettings()
     }
   }).catch((error) => {
     console.error(error);
@@ -131,8 +129,7 @@ ipcMain.handle('getWowAccountFolders', async (event) => {
   getWowAccountFolders(settings.wowPath).then((wowAccountFolders) => {
     if (wowAccountFolders) {
       updateSettingsObject(app, 'wowAccountFolders', wowAccountFolders)
-      const settings = getSettings(app);
-      mainWindow.webContents.send('getSettings', settings);
+      sendSettings()
     }
   }).catch((error) => {
     console.error(error);
@@ -145,8 +142,7 @@ ipcMain.handle('getWowRealmFolders', async (event) => {
   getWowRealmFolders(settings.wowPath, settings.selectedAccountFolder).then((wowRealmFolders) => {
     if (wowRealmFolders) {
       updateSettingsObject(app, 'wowRealmFolders', wowRealmFolders)
-      const settings = getSettings(app);
-      mainWindow.webContents.send('getSettings', settings);
+      sendSettings()
     }
   }).catch((error) => {
     console.error(error);
@@ -159,8 +155,7 @@ ipcMain.handle('getWowCharacterFolders', async (event) => {
   getWowCharacterFolders(settings.wowPath, settings.selectedAccountFolder, settings.selectedRealmFolder).then((wowCharacterFolders) => {
     if (wowCharacterFolders) {
       updateSettingsObject(app, 'wowCharacterFolders', wowCharacterFolders)
-      const settings = getSettings(app);
-      mainWindow.webContents.send('getSettings', settings);
+      sendSettings()
     }
   }).catch((error) => {
     console.error(error);
@@ -185,7 +180,9 @@ ipcMain.handle('parseReflexFile', async (event) => {
     )
 
     if (reflexData) {
-      mainWindow.webContents.send('getSettings', settings);
+      // order by result time
+      reflexData.sort((a, b) => b.time - a.time)
+      // send to renderer
       mainWindow.webContents.send('getReflexData', reflexData);
     }
   } catch (error) {
@@ -197,22 +194,19 @@ ipcMain.handle('parseReflexFile', async (event) => {
 // Save selected account folder
 ipcMain.on('setAccountFolder', async (event, accountFolder) => {
   updateSettingsObject(app, 'selectedAccountFolder', accountFolder);
-  const settings = getSettings(app);
-  mainWindow.webContents.send('getSettings', settings);
+  sendSettings()
 })
 
 // Save selected realm folder
 ipcMain.on('setRealmFolder', async (event, realmFolder) => {
   updateSettingsObject(app, 'selectedRealmFolder', realmFolder);
-  const settings = getSettings(app);
-  mainWindow.webContents.send('getSettings', settings);
+  sendSettings()
 })
 
 // Save selected character folder
 ipcMain.on('setCharacterFolder', async (event, characterFolder) => {
   updateSettingsObject(app, 'selectedCharacterFolder', characterFolder);
-  const settings = getSettings(app);
-  mainWindow.webContents.send('getSettings', settings);
+  sendSettings()
 })
 
 // delete settings file
@@ -220,6 +214,12 @@ ipcMain.handle('resetSelection', async (event) => {
   const settingsPath = getSettingsPath(app);
   if (settingsFileExists(app)) {
     createSettingsFile(app);
-    mainWindow.webContents.send('getSettings', {wowPath: '', wowAccountFolders: []});
+    sendSettings()
   }
 })
+
+// Send settings to renderer
+function sendSettings() {
+  const settings = getSettings(app);
+  mainWindow.webContents.send('getSettings', settings);
+}

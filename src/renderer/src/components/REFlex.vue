@@ -12,10 +12,10 @@ import {
   getShortMapName
 } from "~src/utils/utils";
 import PlayerIcon from "@renderer/components/PlayerIcon.vue";
+import ShuffleStats from "@renderer/components/ShuffleStats.vue";
 
 const main = useMainStore()
 const {
-  getSettings,
   getLocale,
   getTimeZone,
   getSelectedCharacterFolder
@@ -25,27 +25,22 @@ const REFlexData = ref(null);
 const specs = ref(null)
 
 // receive from main process
-window.electron.ipcRenderer.on('getSettings', (event, result) => {
-  main.setSettings(result)
-})
-
-// receive from main process
 window.electron.ipcRenderer.on('getReflexData', (event, result) => {
-  // order by result time
-  result.sort((a, b) => b.time - a.time)
   REFlexData.value = result
 })
 
 // watch getSelectedCharacterFolder
-watch(getSelectedCharacterFolder, (value) => {
+watch(getSelectedCharacterFolder, () => {
   window.wowbuddy.fs.parseReflexFile()
 })
 
+// todo: this should be done in the main process
 // watch REFlexData
 watch(REFlexData, () => {
   getAllSpecsForSelectedCharacter()
 })
 
+// todo: this should be done in the main process
 // get all specializations by class id
 function getAllSpecsForSelectedCharacter() {
   if (REFlexData.value) {
@@ -55,23 +50,23 @@ function getAllSpecsForSelectedCharacter() {
 }
 </script>
 <template>
-<!--  <section class="flex flex-row p-4" v-if="specs">-->
-<!--    <select id="specs" name="specs"-->
-<!--            class="block rounded-md border-0 px-2 py-1.5 text-gray-400 shadow-sm ring-1 ring-inset ring-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-200 sm:max-w-xs sm:text-sm sm:leading-6">-->
-<!--      <option v-for="spec in specs" :key="spec.id" :value="spec.id">-->
-<!--        {{ spec.name }}-->
-<!--      </option>-->
-<!--    </select>-->
-<!--  </section>-->
+  <!--  <section class="flex flex-row p-4" v-if="specs">-->
+  <!--    <select id="specs" name="specs"-->
+  <!--            class="block rounded-md border-0 px-2 py-1.5 text-gray-400 shadow-sm ring-1 ring-inset ring-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-200 sm:max-w-xs sm:text-sm sm:leading-6">-->
+  <!--      <option v-for="spec in specs" :key="spec.id" :value="spec.id">-->
+  <!--        {{ spec.name }}-->
+  <!--      </option>-->
+  <!--    </select>-->
+  <!--  </section>-->
   <section class="flex flex-col justify-center p-4">
     <h1 class="font-bold text-4xl mb-4">Match History</h1>
-<!--        <template v-for="(data, index) in REFlexData">-->
+<!--    <template v-for="(data, index) in REFlexData">-->
 <!--          <span v-if="index === 1">-->
 <!--            <pre>-->
-<!--              {{data}}-->
+<!--              {{ data }}-->
 <!--            </pre>-->
 <!--          </span>-->
-<!--        </template>-->
+<!--    </template>-->
     <div v-if="REFlexData?.length" class="relative">
       <table class="w-full text-sm text-left rtl:text-right text-gray-400 *:cursor-default">
         <thead class="text-xs text-gray-400 uppercase bg-gray-700">
@@ -118,10 +113,13 @@ function getAllSpecsForSelectedCharacter() {
           </td>
           <td>{{ data.player_mmr }}</td>
           <td class="flex flex-row">
-            <template v-for="player in data.players">
-              <template v-if="data.player_side !== player.side && data.type !== 'shuffle'">
+            <template v-for="player in data.players" v-if="data.type !== 'shuffle'">
+              <template v-if="data.player_side !== player.side">
                 <PlayerIcon :player="player"/>
               </template>
+            </template>
+            <template v-else-if="data.type === 'shuffle'">
+              <ShuffleStats :stats="data.player_stats"/>
             </template>
           </td>
           <td>

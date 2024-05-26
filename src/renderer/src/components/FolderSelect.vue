@@ -1,4 +1,5 @@
 <script setup>
+import {watch} from "vue";
 import {storeToRefs} from "pinia";
 import {useMainStore} from "@/stores/main";
 
@@ -11,13 +12,25 @@ const {
   getSelectedAccountFolder,
   getSelectedRealmFolder,
   getSelectedCharacterFolder,
-  getWowRegion,
 } = storeToRefs(main)
 
-// receive from main process
-window.electron.ipcRenderer.on('getSettings', (event, result) => {
-  main.setSettings(result)
-  window.wowbuddy.fs.getWowAccountFolders()
+// watchers
+watch(getWowPath, () => {
+  if (getWowPath) {
+    window.wowbuddy.fs.getWowAccountFolders()
+  }
+})
+
+watch(getSelectedAccountFolder, () => {
+  if (getSelectedAccountFolder) {
+    window.wowbuddy.fs.getWowRealmFolders()
+  }
+})
+
+watch(getSelectedRealmFolder, () => {
+  if (getSelectedRealmFolder) {
+    window.wowbuddy.fs.getWowCharacterFolders()
+  }
 })
 
 // Send to main process
@@ -35,7 +48,6 @@ function sendSelectedAccount(event) {
   if (getWowPath) {
     window.wowbuddy.fs.sendSelectedRealmFolder('')
     window.wowbuddy.fs.sendSelectedCharacterFolder('')
-    window.wowbuddy.fs.getWowRealmFolders(event)
   }
 }
 
@@ -44,7 +56,6 @@ function sendSelectedRealm(event) {
   window.wowbuddy.fs.sendSelectedRealmFolder(event)
   if (getWowPath && getSelectedAccountFolder) {
     window.wowbuddy.fs.sendSelectedCharacterFolder('')
-    window.wowbuddy.fs.getWowCharacterFolders(event)
   }
 }
 

@@ -35,6 +35,7 @@ const matchMapping = {
   [MATCH_FIELD_PLAYER_NUM]: 'player_index',
   [MATCH_FIELD_WINNER]: 'winner',
   [MATCH_FIELD_PLAYER_SIDE]: 'player_side',
+  [MATCH_FIELD_PLAYER_STATS]: 'player_stats',
 };
 
 const playerMapping = {
@@ -86,6 +87,7 @@ export const mapReflexLuaTable = (
             enemy_mmr: null,
             player_index: null,
             player_side: null,
+            player_stats: null,
             player_win: null,
             player_mmr: null,
             players: [],
@@ -239,9 +241,17 @@ export const mapReflexLuaTable = (
                 }
                 break;
               }
-              case MATCH_FIELD_IS_SOLO_SHUFFLE: {
+              case MATCH_FIELD_IS_SOLO_SHUFFLE:
+              case MATCH_FIELD_PLAYER_STATS: {
                 if (value.type === 'BooleanLiteral') {
                   isSoloShuffle = value.value;
+                }
+                if (value.type === 'TableConstructorExpression') {
+                  const numericFields = value.fields
+                    .filter(field => field.value.type === 'NumericLiteral')
+                    .map(field => field.value.value);
+
+                  match.player_stats = numericFields.length === 1 ? numericFields[0] : null;
                 }
                 break;
               }
@@ -252,7 +262,6 @@ export const mapReflexLuaTable = (
                 break;
               }
 
-              case MATCH_FIELD_PLAYER_STATS:
               case MATCH_FIELD_IS_BRAWL:
               case MATCH_FIELD_IS_ARENA:
               case MATCH_FIELD_BG_COMPOSITION:
