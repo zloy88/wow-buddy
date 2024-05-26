@@ -8,7 +8,6 @@ import {
   selectWowFolder,
   settingsFileExists,
   createSettingsFile,
-  updateSettingsFile,
   getWowAccountFolders,
   getWowRealmFolders,
   getWowCharacterFolders,
@@ -113,7 +112,7 @@ ipcMain.handle('selectFolder', async (event) => {
         createSettingsFile(app);
       }
       // Write selected folder to settings file
-      updateSettingsFile(app, {wowPath: wowPath})
+      updateSettingsObject(app, 'wowPath', wowPath)
       // Write wowRegion to settings file
       getRegionFromWowPath(app, wowPath);
       // Send selected folder to renderer
@@ -170,8 +169,13 @@ ipcMain.handle('getWowCharacterFolders', async (event) => {
 
 // Parse REFlex.lua file
 ipcMain.handle('parseReflexFile', async (event) => {
+  const settings = getSettings(app);
+
+  if (!settings.selectedAccountFolder || !settings.selectedRealmFolder || !settings.selectedCharacterFolder) {
+    return;
+  }
+
   try {
-    const settings = getSettings(app);
     const reflexData = await readREFlexData(
       settings.wowPath,
       settings.selectedAccountFolder,

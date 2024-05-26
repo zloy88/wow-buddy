@@ -1,7 +1,7 @@
 import {dialog} from 'electron';
 import {dirname} from 'path';
 import {existsSync, readdirSync, readFileSync, writeFileSync} from 'fs';
-import {mapReflexLuaToStoreData} from './mapReflexLuaToStoreData';
+import {mapReflexLuaTable} from './mapReflexLuaTable';
 
 export async function selectWowFolder() {
   const winPath = 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
@@ -46,6 +46,8 @@ export function settingsFileExists(_app) {
 export function createSettingsFile(_app) {
   const settingsPath = getSettingsPath(_app);
   const defaultSettings = {
+    locale: Intl.DateTimeFormat().resolvedOptions().locale,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     wowPath: '',
     wowVersion: 'retail',
     wowRegion: '',
@@ -151,7 +153,7 @@ export async function readREFlexData(wowPath, accPath, realmPath, charPath, regi
 
 // Function to parse LUA file with luaparse and map it to own data structure
 export async function parseLuaFile(filePath, realm, region) {
-  return mapReflexLuaToStoreData(
+  return mapReflexLuaTable(
     readFileSync(filePath, 'utf-8'),
     realm,
     region

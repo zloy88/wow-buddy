@@ -46,7 +46,7 @@ const playerMapping = {
   [mapLuaIndex(13)]: 'rating_change',
 };
 
-export const mapReflexLuaToStoreData = (
+export const mapReflexLuaTable = (
   luaString,
   realm,
   region
@@ -272,9 +272,9 @@ export const mapReflexLuaToStoreData = (
 
           let matchType = null;
 
-          if (playersNum === 4) {
+          if (playersNum === 4 && isRated === true) {
             matchType = '2v2';
-          } else if (playersNum === 6 && isSoloShuffle === false) {
+          } else if (playersNum === 6 && isRated === true && isSoloShuffle === false) {
             matchType = '3v3';
           } else if (playersNum === 10 && isRated === true) {
             matchType = 'rbg';
@@ -292,6 +292,16 @@ export const mapReflexLuaToStoreData = (
               player.region = region;
             }
           });
+
+          // cleanup match data - remove rbg and empty types
+          if (!match.type || match.type === 'rbg') {
+            continue;
+          }
+
+          // cleanup match data - remove if player count does not match the type
+          if (playersNum !== match.players.length) {
+            continue;
+          }
 
           matches.push(match);
         } catch {

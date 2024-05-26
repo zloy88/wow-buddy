@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#app {
+  @apply text-white;
+}
+
+.btn-primary {
+  @apply cursor-pointer m-4 px-4 py-2 border-2 border-gray-400 text-gray-400 hover:border-gray-400 hover:text-gray-200;
+}
+
+.tooltip {
+  @apply relative inline-block;
+  .tooltiptext {
+    @apply invisible absolute bg-black text-white rounded px-2 py-1 max-w-[120px];
+    /* Tooltip top position */
+    bottom: 150%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: black transparent transparent transparent;
+    }
+  }
+
+  &:hover .tooltiptext {
+    @apply visible;
+  }
+}

@@ -315,6 +315,11 @@ class ClassesDictionary {
     return this.maps.specializationNameMap.get(name);
   }
 
+  getAllSpecializationsByClassId(classId) {
+    const wowClass = this.getClassById(classId);
+    return wowClass.specializations;
+  }
+
   mapData(dataToMap = wowClasses) {
     Object.values(this.maps).forEach((map) => map.clear());
 
@@ -325,7 +330,7 @@ class ClassesDictionary {
       this.maps.classNameMap.set(name, characterClass);
 
       specializations.forEach((characterSpecialization) => {
-        const {id, name, code, blizzard_id} = characterSpecialization;
+        const {id, name} = characterSpecialization;
 
         this.maps.specializationIdMap.set(id, characterSpecialization);
         this.maps.specializationNameMap.set(name, characterSpecialization);

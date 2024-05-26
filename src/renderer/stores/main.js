@@ -5,6 +5,8 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 export const useMainStore = defineStore('main', {
   state: () => ({
     settings: {
+      locale: 'de-DE',
+      timeZone: 'Europe/Amsterdam',
       wowVersion: 'retail',
       wowPath: '',
       wowRegion: '',
@@ -18,6 +20,8 @@ export const useMainStore = defineStore('main', {
   }),
   getters: {
     getSettings: (state) => state.settings,
+    getLocale: (state) => state.settings.locale,
+    getTimeZone: (state) => state.settings.timeZone,
     getWowPath: (state) => state.settings.wowPath,
     getWowAccountFolders: (state) => state.settings.wowAccountFolders,
     getWowRealmFolders: (state) => state.settings.wowRealmFolders,

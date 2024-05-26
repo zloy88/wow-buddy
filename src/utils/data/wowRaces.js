@@ -118,7 +118,7 @@ class RacesDictionary {
     Object.values(this.maps).forEach((map) => map.clear());
 
     dataToMap.forEach((race) => {
-      const { id, name, code, blizzard_id } = race;
+      const { id, name } = race;
 
       this.maps.idMap.set(id, race);
       this.maps.nameMap.set(name, race);
