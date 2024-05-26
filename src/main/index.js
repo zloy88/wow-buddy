@@ -2,7 +2,6 @@ import {app, shell, BrowserWindow, ipcMain} from 'electron'
 import {join} from 'path'
 import {electronApp, optimizer, is} from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import {unlinkSync} from 'fs';
 import {
   getSettings,
   getSettingsPath,
@@ -14,7 +13,8 @@ import {
   getWowRealmFolders,
   getWowCharacterFolders,
   updateSettingsObject,
-  readREFlexData, getRegionFromWowPath
+  readREFlexData,
+  getRegionFromWowPath
 } from "../actions/fileActions";
 
 let mainWindow;
@@ -172,7 +172,13 @@ ipcMain.handle('getWowCharacterFolders', async (event) => {
 ipcMain.handle('parseReflexFile', async (event) => {
   try {
     const settings = getSettings(app);
-    const reflexData = await readREFlexData(settings.wowPath, settings.selectedAccountFolder, settings.selectedRealmFolder, settings.selectedCharacterFolder)
+    const reflexData = await readREFlexData(
+      settings.wowPath,
+      settings.selectedAccountFolder,
+      settings.selectedRealmFolder,
+      settings.selectedCharacterFolder,
+      settings.wowRegion
+    )
 
     if (reflexData) {
       mainWindow.webContents.send('getSettings', settings);

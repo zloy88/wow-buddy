@@ -1,7 +1,7 @@
 import {dialog} from 'electron';
 import {dirname} from 'path';
 import {existsSync, readdirSync, readFileSync, writeFileSync} from 'fs';
-import {execFile} from 'child_process';
+import {mapReflexLuaToStoreData} from './mapReflexLuaToStoreData';
 
 export async function selectWowFolder() {
   const winPath = 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
@@ -132,48 +132,30 @@ export async function getWowCharacterFolders(wowPath, accPath, realmPath) {
   return folders;
 }
 
-export async function readREFlexData(wowPath, accPath, realmPath, charPath) {
+export async function readREFlexData(wowPath, accPath, realmPath, charPath, region) {
   const REFlexFile = wowPath + '\\WTF\\Account\\' + accPath + '\\' + realmPath + '\\' + charPath + '\\SavedVariables\\REFlex.lua';
-  const luaPath = process.cwd() + '\\lua';
-  const luaExecutable = luaPath + '\\lua54.exe';
-  const luaScriptPath = luaPath + '\\parseREFlex.lua';
 
   if (existsSync(REFlexFile)) {
     try {
-      return await executeLuaScriptWithParam(luaExecutable, luaScriptPath, REFlexFile);
+      return await parseLuaFile(REFlexFile, realmPath, region);
     } catch (error) {
-      console.error('Failed to execute Lua script:', error);
+      console.error('Failed to parse Lua file:', error);
       throw error;
     }
   } else {
     throw new Error(`REFlex file does not exist: ${REFlexFile}`);
   }
+
+
 }
 
-// Function to execute a Lua script with a parameter
-function executeLuaScriptWithParam(luaExecutable,scriptPath, param, callback) {
-  return new Promise((resolve, reject) => {
-    execFile(luaExecutable, [scriptPath, param], (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error executing Lua script: ${error.message}`);
-        reject(error);
-      }
-      if (stderr) {
-        console.error(`Lua script error: ${stderr}`);
-        reject(stderr);
-      }
-      try {
-        const jsonOutput = JSON.parse(stdout);
-        // filter entries where isRated and isArena is true
-        const filteredOutput = jsonOutput.filter((entry) => entry.isRated && entry.isArena);
-        // sort by Time desc
-        filteredOutput.sort((a, b) => b.Time - a.Time);
-        resolve(filteredOutput);
-      } catch (parseError) {
-        reject(parseError);
-      }
-    });
-  });
+// Function to parse LUA file with luaparse and map it to own data structure
+export async function parseLuaFile(filePath, realm, region) {
+  return mapReflexLuaToStoreData(
+    readFileSync(filePath, 'utf-8'),
+    realm,
+    region
+  );
 }
 
 export function getRegionFromWowPath(_app, wowPath) {

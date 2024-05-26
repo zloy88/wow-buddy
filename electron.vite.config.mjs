@@ -14,7 +14,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),
-        '@': fileURLToPath(new URL('./src/renderer', import.meta.url))
+        '@': fileURLToPath(new URL('./src/renderer', import.meta.url)),
+        '~src': resolve('src'),
       }
     },
     plugins: [vue()],
