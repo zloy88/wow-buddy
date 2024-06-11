@@ -311,8 +311,9 @@ class ClassesDictionary {
     return this.maps.specializationIdMap.get(id);
   }
 
-  getSpecializationByName(name) {
-    return this.maps.specializationNameMap.get(name);
+  getSpecializationByNameAndClassId(name, classId) {
+    const wowClass = this.getClassById(classId);
+    return wowClass.specializations.find((specialization) => specialization.name === name);
   }
 
   getAllSpecializationsByClassId(classId) {

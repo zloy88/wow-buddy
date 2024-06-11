@@ -4,7 +4,7 @@ import {classesDictionary} from "~src/utils/data/wowClasses";
 import {racesDictionary} from "~src/utils/data/wowRaces";
 import {formatString} from "~src/utils/utils";
 
-const {props} = defineProps(['player'])
+const props = defineProps(['player'])
 
 function getSpecImageName(data) {
   // combine class and spec

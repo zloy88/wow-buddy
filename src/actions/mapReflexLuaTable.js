@@ -177,7 +177,7 @@ export const mapReflexLuaTable = (
                           case mapLuaIndex(16): {
                             if (playerValue.type === 'StringLiteral') {
                               const spec_name = replaceQuotes(playerValue.raw);
-                              playerResult.spec_id = classesDictionary.getSpecializationByName(spec_name)?.id ?? null;
+                              playerResult.spec_id = classesDictionary.getSpecializationByNameAndClassId(spec_name, playerResult.class_id)?.id ?? null;
                             }
                             break;
                           }
