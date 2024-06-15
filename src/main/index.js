@@ -1,6 +1,8 @@
-import {app, autoUpdater, shell, BrowserWindow, ipcMain} from 'electron'
+import {app, shell, BrowserWindow, ipcMain} from 'electron'
+import {autoUpdater} from 'electron-updater'
 import {join} from 'path'
 import {electronApp, optimizer, is} from '@electron-toolkit/utils'
+import squirrelStartup from 'electron-squirrel-startup'
 import icon from '../../resources/icon.png?asset'
 import {
   getSettings,
@@ -16,19 +18,21 @@ import {
   getRegionFromWowPath
 } from "../actions/fileActions";
 
-// Auto Updater Handling
-const server = 'https://wow-buddy.vercel.app'
-const url = `${server}/update/${process.platform}/${app.getVersion()}`
+// Handle Squirrel events for Windows
+if (squirrelStartup) {
+  app.quit();
+}
 
-autoUpdater.setFeedURL({url})
-
+// Enable Update on Dev
+// autoUpdater.forceDevUpdateConfig = true;
 
 // Main Window
 let mainWindow;
+
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    title: 'Seramate',
+    title: 'Wow Buddy',
     // titleBarStyle: 'hidden',
     // autoHideMenuBar: true,
     backgroundColor: '#000000',
@@ -96,6 +100,18 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+  // Check for updates
+  autoUpdater.checkForUpdates();
+})
+
+autoUpdater.on('update-available', () => {
+  mainWindow.webContents.send('updateMessage', 'Update available. Downloading...');
+  autoUpdater.downloadUpdate();
+})
+
+autoUpdater.on('update-downloaded', () => {
+  autoUpdater.quitAndInstall();
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

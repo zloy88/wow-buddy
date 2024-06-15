@@ -1,6 +1,6 @@
 {
   "name": "wow-buddy",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "WoW Buddy built with Electron and Vite",
   "main": "./out/main/index.js",
   "author": "zloy88",
@@ -16,9 +16,12 @@
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux"
   },
+  "repository": "https://github.com/zloy88/wow-buddy-releases",
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
+    "electron-builder-squirrel-windows": "^24.13.3",
+    "electron-squirrel-startup": "^1.0.1",
     "electron-updater": "^6.1.7",
     "luaparse": "^0.3.1",
     "pathe": "^1.1.2",

@@ -57,15 +57,12 @@ watch(REFlexData, () => {
     selectedClass.value = classesDictionary.getClassById(currentPlayer.class_id);
     specData.value = classesDictionary.getAllSpecializationsByClassId(currentPlayer.class_id);
     selectedSpec.value = classesDictionary.getSpecializationById(currentPlayer.spec_id);
-    console.log(selectedClass.value)
-    console.log(selectedSpec.value)
   }
 })
 
 // Watch selectedType and selectedSpec
 watch([selectedType, selectedSpec], () => {
   if (REFlexData.value) {
-    console.log(selectedSpec.value)
     filterData();
   }
 })
