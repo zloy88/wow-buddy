@@ -32,3 +32,26 @@ $ npm run build:mac
 # For Linux
 $ npm run build:linux
 ```
+
+### Deploy
+To deploy a new version, the following steps have to be executed:
+increase the version in the `package.json` file
+```json
+{
+  "version": "0.1.0"
+}
+```
+Create a new build for the desired platform
+```bash
+npm run build:win
+```
+After a successful build, the installer will be located in the `dist` folder.
+All files in the `dist` folder have to be added to the release on GitHub.
+https://github.com/zloy88/wow-buddy-release/releases
+
+Attach the following files to a new release:
+- `wow-buddy-<version>-setup.exe`
+- `wow-buddy-<version>-setup.exe.blockmap`
+- `builder-debug.yml`
+- `builder-effective-config.yaml`
+- `latest.yml`
