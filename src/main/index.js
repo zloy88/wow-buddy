@@ -1,4 +1,4 @@
-import {app, shell, BrowserWindow, ipcMain} from 'electron'
+import {app, autoUpdater, shell, BrowserWindow, ipcMain} from 'electron'
 import {join} from 'path'
 import {electronApp, optimizer, is} from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -16,8 +16,15 @@ import {
   getRegionFromWowPath
 } from "../actions/fileActions";
 
-let mainWindow;
+// Auto Updater Handling
+const server = 'https://wow-buddy.vercel.app'
+const url = `${server}/update/${process.platform}/${app.getVersion()}`
 
+autoUpdater.setFeedURL({url})
+
+
+// Main Window
+let mainWindow;
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
