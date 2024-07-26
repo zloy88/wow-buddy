@@ -139,7 +139,7 @@ export async function readREFlexData(wowPath, accPath, realmPath, charPath, regi
 
   if (existsSync(REFlexFile)) {
     try {
-      return await parseLuaFile(REFlexFile, realmPath, region);
+      return await parseLuaFile(REFlexFile, accPath, realmPath, region);
     } catch (error) {
       console.error('Failed to parse Lua file:', error);
       throw error;
@@ -152,9 +152,10 @@ export async function readREFlexData(wowPath, accPath, realmPath, charPath, regi
 }
 
 // Function to parse LUA file with luaparse and map it to own data structure
-export async function parseLuaFile(filePath, realm, region) {
+export async function parseLuaFile(filePath, bnet_account, realm, region) {
   return mapReflexLuaTable(
     readFileSync(filePath, 'utf-8'),
+    bnet_account,
     realm,
     region
   );

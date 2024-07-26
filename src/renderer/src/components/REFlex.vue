@@ -1,5 +1,5 @@
 <script setup>
-import {ref, watch} from "vue";
+import {ref, watch, computed} from "vue";
 import {storeToRefs} from "pinia";
 import {useMainStore} from "@/stores/main";
 import {mapsDictionary} from "~src/utils/data/wowMaps";
@@ -96,16 +96,46 @@ function sortTable(columnKey) {
     }
   });
 }
+
+// Count games by winner
+const gamesByWinner = computed(() => {
+  if (filteredData.value) {
+    return filteredData.value.reduce((acc, data) => {
+      // if data.type is shuffle, then we need to check if the player won or lost by taking data.player_stats
+      if (data.type === 'shuffle') {
+        if (data.player_stats) {
+          acc.wins += data.player_stats;
+          acc.losses += (6 - data.player_stats);
+        }
+        return acc;
+      }
+      // if data.type is not shuffle, then we can check the rating_change
+      if (data.players[data.player_index].rating_change > 0) {
+        acc.wins++;
+      } else {
+        acc.losses++;
+      }
+      return acc;
+    }, {wins: 0, losses: 0});
+  }
+});
+
+// Calculate win ratio
+const winRatio = computed(() => {
+  if (gamesByWinner.value) {
+    return ((gamesByWinner.value.wins / (gamesByWinner.value.wins + gamesByWinner.value.losses)) * 100).toFixed() + '%';
+  }
+});
 </script>
 <template>
   <section class="flex flex-col justify-center p-4">
-<!--    <template v-for="(data, index) in REFlexData">-->
-<!--      <template v-if="index < 3">-->
-<!--        <pre>-->
-<!--          {{ data }}-->
-<!--        </pre>-->
-<!--      </template>-->
-<!--    </template>-->
+    <template v-for="(data, index) in REFlexData">
+      <template v-if="index < 3">
+        <pre>
+          {{ data }}
+        </pre>
+      </template>
+    </template>
     <div class="flex flex-row gap-4 mb-4" v-if="types">
       <template v-for="type in types">
         <button
@@ -130,6 +160,12 @@ function sortTable(columnKey) {
       </template>
     </div>
     <div v-if="filteredData?.length" class="relative">
+      <div class="mb-2 flex gap-4">
+        <span>{{ filteredData.length }} games</span>
+        <span>{{gamesByWinner.wins}} wins</span>
+        <span>{{gamesByWinner.losses}} losses</span>
+        <span>{{winRatio}} win rate</span>
+      </div>
       <table class="w-full text-sm text-left rtl:text-right text-gray-400 *:cursor-default">
         <thead class="text-xs text-gray-400 uppercase bg-gray-700">
         <tr>

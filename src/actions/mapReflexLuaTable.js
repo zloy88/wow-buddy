@@ -49,6 +49,7 @@ const playerMapping = {
 
 export const mapReflexLuaTable = (
   luaString,
+  bnet_account,
   realm,
   region
 ) => {
@@ -77,6 +78,9 @@ export const mapReflexLuaTable = (
           const {fields} = dataLvl_3.value;
 
           const match = {
+            bnet_account: bnet_account,
+            realm: realm,
+            region: region,
             season_id: null,
             duration: null,
             time: null,
