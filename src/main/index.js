@@ -1,7 +1,7 @@
-import {app, shell, BrowserWindow, ipcMain} from 'electron'
-import {autoUpdater} from 'electron-updater'
-import {join} from 'path'
-import {electronApp, optimizer, is} from '@electron-toolkit/utils'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { autoUpdater } from 'electron-updater'
+import { join } from 'path'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import squirrelStartup from 'electron-squirrel-startup'
 import icon from '../../resources/icon.png?asset'
 import {
@@ -16,18 +16,18 @@ import {
   updateSettingsObject,
   readREFlexData,
   getRegionFromWowPath
-} from "../actions/fileActions";
+} from '../actions/fileActions'
 
 // Handle Squirrel events for Windows
 if (squirrelStartup) {
-  app.quit();
+  app.quit()
 }
 
 // Enable Update on Dev
 // autoUpdater.forceDevUpdateConfig = true;
 
 // Main Window
-let mainWindow;
+let mainWindow
 
 function createWindow() {
   // Create the browser window.
@@ -39,7 +39,7 @@ function createWindow() {
     width: 1400,
     height: 900,
     show: false,
-    ...(process.platform === 'linux' ? {icon} : {}),
+    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -48,8 +48,8 @@ function createWindow() {
     }
   })
 
-  mainWindow.setMinimumSize(1120, 600);
-  mainWindow.setMenuBarVisibility(false);
+  mainWindow.setMinimumSize(1120, 600)
+  mainWindow.setMenuBarVisibility(false)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -57,7 +57,7 @@ function createWindow() {
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
-    return {action: 'deny'}
+    return { action: 'deny' }
   })
 
   // HMR for renderer base on electron-vite cli.
@@ -74,7 +74,7 @@ function createWindow() {
       // Send settings to renderer
       sendSettings()
     } else {
-      createSettingsFile(app);
+      createSettingsFile(app)
     }
   })
 }
@@ -90,11 +90,11 @@ const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
 } else {
-  app.on('second-instance', (event, commandLine, workingDirectory) => {
+  app.on('second-instance', () => {
     // Someone tried to run a second instance, we should focus our window.
-    if (myWindow) {
-      if (myWindow.isMinimized()) myWindow.restore()
-      myWindow.focus()
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
     }
   })
 
@@ -118,17 +118,17 @@ if (!gotTheLock) {
     })
 
     // Check for updates
-    autoUpdater.checkForUpdates();
+    autoUpdater.checkForUpdates()
   })
 }
 
 autoUpdater.on('update-available', () => {
-  mainWindow.webContents.send('updateMessage', 'Update available. Downloading...');
-  autoUpdater.downloadUpdate();
+  mainWindow.webContents.send('updateMessage', 'Update available. Downloading...')
+  autoUpdater.downloadUpdate()
 })
 
 autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall();
+  autoUpdater.quitAndInstall()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -144,70 +144,85 @@ app.on('window-all-closed', () => {
 // code. You can also put them in separate files and require them here.
 
 // Open file/folder dialog
-ipcMain.handle('selectFolder', async (event) => {
-  selectWowFolder().then((wowPath) => {
-    if (wowPath) {
-      if (!settingsFileExists(app)) {
-        createSettingsFile(app);
+ipcMain.handle('selectFolder', async () => {
+  selectWowFolder()
+    .then((wowPath) => {
+      if (wowPath) {
+        if (!settingsFileExists(app)) {
+          createSettingsFile(app)
+        }
+        // Write selected folder to settings file
+        updateSettingsObject(app, 'wowPath', wowPath)
+        // Write wowRegion to settings file
+        getRegionFromWowPath(app, wowPath)
+        // Send settings to renderer
+        sendSettings()
       }
-      // Write selected folder to settings file
-      updateSettingsObject(app, 'wowPath', wowPath)
-      // Write wowRegion to settings file
-      getRegionFromWowPath(app, wowPath);
-      // Send settings to renderer
-      sendSettings()
-    }
-  }).catch((error) => {
-    console.error(error);
-  })
+    })
+    .catch((error) => {
+      console.error(error)
+    })
 })
 
-
 // Get account folders
-ipcMain.handle('getWowAccountFolders', async (event) => {
-  const settings = getSettings(app);
-  getWowAccountFolders(settings.wowPath).then((wowAccountFolders) => {
-    if (wowAccountFolders) {
-      updateSettingsObject(app, 'wowAccountFolders', wowAccountFolders)
-      sendSettings()
-    }
-  }).catch((error) => {
-    console.error(error);
-  })
+ipcMain.handle('getWowAccountFolders', async () => {
+  const settings = getSettings(app)
+  getWowAccountFolders(settings.wowPath)
+    .then((wowAccountFolders) => {
+      if (wowAccountFolders) {
+        updateSettingsObject(app, 'wowAccountFolders', wowAccountFolders)
+        sendSettings()
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    })
 })
 
 // Get realm folders
-ipcMain.handle('getWowRealmFolders', async (event) => {
-  const settings = getSettings(app);
-  getWowRealmFolders(settings.wowPath, settings.selectedAccountFolder).then((wowRealmFolders) => {
-    if (wowRealmFolders) {
-      updateSettingsObject(app, 'wowRealmFolders', wowRealmFolders)
-      sendSettings()
-    }
-  }).catch((error) => {
-    console.error(error);
-  })
+ipcMain.handle('getWowRealmFolders', async () => {
+  const settings = getSettings(app)
+  getWowRealmFolders(settings.wowPath, settings.selectedAccountFolder)
+    .then((wowRealmFolders) => {
+      if (wowRealmFolders) {
+        updateSettingsObject(app, 'wowRealmFolders', wowRealmFolders)
+        sendSettings()
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    })
 })
 
 // Get character folders
-ipcMain.handle('getWowCharacterFolders', async (event) => {
-  const settings = getSettings(app);
-  getWowCharacterFolders(settings.wowPath, settings.selectedAccountFolder, settings.selectedRealmFolder).then((wowCharacterFolders) => {
-    if (wowCharacterFolders) {
-      updateSettingsObject(app, 'wowCharacterFolders', wowCharacterFolders)
-      sendSettings()
-    }
-  }).catch((error) => {
-    console.error(error);
-  })
+ipcMain.handle('getWowCharacterFolders', async () => {
+  const settings = getSettings(app)
+  getWowCharacterFolders(
+    settings.wowPath,
+    settings.selectedAccountFolder,
+    settings.selectedRealmFolder
+  )
+    .then((wowCharacterFolders) => {
+      if (wowCharacterFolders) {
+        updateSettingsObject(app, 'wowCharacterFolders', wowCharacterFolders)
+        sendSettings()
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    })
 })
 
 // Parse REFlex.lua file
-ipcMain.handle('parseReflexFile', async (event) => {
-  const settings = getSettings(app);
+ipcMain.handle('parseReflexFile', async () => {
+  const settings = getSettings(app)
 
-  if (!settings.selectedAccountFolder || !settings.selectedRealmFolder || !settings.selectedCharacterFolder) {
-    return;
+  if (
+    !settings.selectedAccountFolder ||
+    !settings.selectedRealmFolder ||
+    !settings.selectedCharacterFolder
+  ) {
+    return
   }
 
   try {
@@ -223,43 +238,43 @@ ipcMain.handle('parseReflexFile', async (event) => {
       // order by result time
       reflexData.sort((a, b) => b.time - a.time)
       // send to renderer
-      mainWindow.webContents.send('getReflexData', reflexData);
+      mainWindow.webContents.send('getReflexData', reflexData)
     }
   } catch (error) {
-    console.error(error);
-    throw error;
+    console.error(error)
+    throw error
   }
 })
 
 // Save selected account folder
 ipcMain.on('setAccountFolder', async (event, accountFolder) => {
-  updateSettingsObject(app, 'selectedAccountFolder', accountFolder);
+  updateSettingsObject(app, 'selectedAccountFolder', accountFolder)
   sendSettings()
 })
 
 // Save selected realm folder
 ipcMain.on('setRealmFolder', async (event, realmFolder) => {
-  updateSettingsObject(app, 'selectedRealmFolder', realmFolder);
+  updateSettingsObject(app, 'selectedRealmFolder', realmFolder)
   sendSettings()
 })
 
 // Save selected character folder
 ipcMain.on('setCharacterFolder', async (event, characterFolder) => {
-  updateSettingsObject(app, 'selectedCharacterFolder', characterFolder);
+  updateSettingsObject(app, 'selectedCharacterFolder', characterFolder)
   sendSettings()
 })
 
 // delete settings file
-ipcMain.handle('resetSelection', async (event) => {
-  const settingsPath = getSettingsPath(app);
+ipcMain.handle('resetSelection', async () => {
+  getSettingsPath(app)
   if (settingsFileExists(app)) {
-    createSettingsFile(app);
+    createSettingsFile(app)
     sendSettings()
   }
 })
 
 // Send settings to renderer
 function sendSettings() {
-  const settings = getSettings(app);
-  mainWindow.webContents.send('getSettings', settings);
+  const settings = getSettings(app)
+  mainWindow.webContents.send('getSettings', settings)
 }
