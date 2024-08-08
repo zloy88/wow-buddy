@@ -248,6 +248,7 @@ ipcMain.handle('parseReflexFile', async () => {
 
 // Save selected account folder
 ipcMain.on('setAccountFolder', async (event, accountFolder) => {
+  console.log(accountFolder, 'selectedAccountFolder')
   updateSettingsObject(app, 'selectedAccountFolder', accountFolder)
   sendSettings()
 })

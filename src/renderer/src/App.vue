@@ -1,8 +1,8 @@
 <script setup>
-import {ref} from 'vue'
+import { ref } from 'vue'
 import FolderSelect from './components/FolderSelect.vue'
-import REFlex from "./components/REFlex.vue";
-import {useMainStore} from "@/stores/main";
+import REFlex from './components/REFlex.vue'
+import { useMainStore } from '@/stores/main'
 
 const main = useMainStore()
 

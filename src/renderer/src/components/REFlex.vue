@@ -129,19 +129,13 @@ const winRatio = computed(() => {
 </script>
 <template>
   <section class="flex flex-col justify-center p-4">
-    <template v-for="(data, index) in REFlexData">
-      <template v-if="index < 3">
-        <pre>
-          {{ data }}
-        </pre>
-      </template>
-    </template>
-    <div class="flex flex-row gap-4 mb-4" v-if="types">
+    <div v-if="types" class="flex flex-row gap-4 mb-4">
       <template v-for="type in types">
         <button
-          @click="selectedType = type"
           :class="selectedType === type ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-400'"
-          class="px-4 py-2">
+          class="px-4 py-2"
+          @click="selectedType = type"
+        >
           {{ type }}
         </button>
       </template>
@@ -152,9 +146,9 @@ const winRatio = computed(() => {
       </button>
       <template v-for="spec in selectedClass.specializations">
         <button
-          @click="selectedSpec = spec"
           :class="selectedSpec === spec ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-400'"
-          class="px-4 py-2">
+          class="px-4 py-2"
+          @click="selectedSpec = spec">
           {{ spec.name }}
         </button>
       </template>

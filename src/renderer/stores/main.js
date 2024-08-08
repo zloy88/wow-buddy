@@ -15,8 +15,8 @@ export const useMainStore = defineStore('main', {
       wowCharacterFolders: [],
       selectedAccountFolder: '',
       selectedRealmFolder: '',
-      selectedCharacterFolder: '',
-    },
+      selectedCharacterFolder: ''
+    }
   }),
   getters: {
     getSettings: (state) => state.settings,
